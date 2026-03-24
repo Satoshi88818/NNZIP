@@ -1,0 +1,235 @@
+
+
+---
+
+### Final Project Structure (ready to `git init`)
+
+```bash
+nn-checkpoint/
+├── pyproject.toml              # ← modern PEP 621 config (no setup.py needed)
+├── README.md                   # ← enhanced
+├── LICENSE                     # ← MIT
+├── CHANGELOG.md
+├── .gitignore
+├── nn_checkpoint/
+│   ├── __init__.py             # ← version + public API
+│   ├── checkpoint.py
+│   ├── manager.py
+│   ├── inspect.py
+│   └── __pycache__/            # (ignored)
+├── examples/
+│   └── train_loop.py
+├── tests/
+│   └── test_checkpoint.py
+├── requirements.txt            # ← kept for legacy, but not used
+└── MANIFEST.in
+```
+
+---
+
+### 1. `pyproject.toml` (the heart)
+
+```toml
+[project]
+name = "nn-checkpoint"
+version = "0.2.0"
+description = "ZIP-based neural network checkpoints • framework-agnostic • keeps only the best N • tiny & fast"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "James Squire", email = "you@example.com"},
+]
+keywords = ["pytorch", "jax", "checkpoint", "save", "resume", "neural-network", "zip"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+requires-python = ">=3.8"
+dependencies = [
+    "numpy>=1.24",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=7.0"]
+dev  = ["pytest>=7.0", "black", "ruff", "mypy"]
+
+[project.urls]
+Homepage = "https://github.com/Satoshi88818/NNZIP/blob/main/README.md"
+Repository = "https://github.com/Satoshi88818/NNZIP/blob/main/README.md"
+Documentation = "https://github.com/Satoshi88818/NNZIP/blob/main/README.md"
+
+[project.scripts]
+nn-inspect = "nn_checkpoint.inspect:main"
+
+[project.entry-points."console_scripts"]
+nn_checkpoint_inspect = "nn_checkpoint.inspect:main"   # alias
+
+[tool.setuptools]
+packages = ["nn_checkpoint"]
+package-dir = {"" = "."}
+
+[tool.setuptools.dynamic]
+version = {attr = "nn_checkpoint.__version__"}
+
+[tool.ruff]
+line-length = 100
+```
+
+---
+
+### 2. `nn_checkpoint/__init__.py`
+
+```python
+"""nn-checkpoint — Lightweight ZIP checkpoints for any neural network."""
+
+__version__ = "0.2.0"
+__author__ = "James Squire" 
+
+from .checkpoint import Checkpoint
+from .manager import CheckpointManager
+
+__all__ = ["Checkpoint", "CheckpointManager"]
+```
+
+---
+
+### 3. `README.md` (replaced / enhanced)
+
+```markdown
+# nn-checkpoint
+
+**ZIP-based neural network checkpoints** • Keeps only the best N • Framework-agnostic • Tiny & blazing fast.
+
+```bash
+pip install nn-checkpoint
+```
+
+### Features
+
+- Single `.zip` file with architecture, weights (custom efficient binary), optimizer, metadata & full training log  
+- `CheckpointManager` auto-keeps top-N checkpoints by any metric  
+- CLI: `nn-inspect checkpoint.zip`  
+- One-line PyTorch integration
+
+### Install
+
+```bash
+pip install nn-checkpoint
+# or from source
+pip install -e .
+```
+
+### Quick Start
+
+```python
+from nn_checkpoint import Checkpoint, CheckpointManager
+
+manager = CheckpointManager("checkpoints/", keep_top_n=3)
+
+ckpt = Checkpoint(architecture, state_dict, optimizer_state=opt_state)
+ckpt.log_epoch(...)
+
+manager.save(ckpt, epoch=42)          # only saves if better
+best = manager.best()                 # loads the best
+```
+
+See `examples/train_loop.py`
+
+### CLI
+
+```bash
+nn-inspect checkpoints/epoch_0042.zip
+```
+
+---
+
+### 4. `LICENSE` (MIT)
+
+```text
+MIT License
+
+Copyright (c) 2026 Your Name
+
+Permission is hereby granted, free of charge, to any person obtaining a copy...
+```
+
+---
+
+### 5. `CHANGELOG.md`
+
+```markdown
+## 0.2.0 (2026-03-24)
+- Full pip packaging (pyproject.toml)
+- CLI entry point `nn-inspect`
+- Public API in __init__.py
+- Tests + dev extras
+
+## 0.1.0
+- Initial prototype
+```
+
+---
+
+### 6. `.gitignore`
+
+```gitignore
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.venv/
+```
+
+---
+
+### 7. `MANIFEST.in`
+
+```text
+include README.md LICENSE CHANGELOG.md
+recursive-include nn_checkpoint *.py
+```
+
+---
+
+### How to publish / test right now
+
+```bash
+# 1. In the root folder
+pip install -e ".[dev]"
+
+# 2. Test
+pytest
+
+# 3. Build & check
+python -m build
+twine check dist/*
+
+# 4. Publish (after changing author/url)
+python -m build
+twine upload dist/*
+```
+
+---
+
+**You now have a production-grade package.**
+
+Just do this:
+
+1. Rename your folder to `nn-checkpoint`
+2. Copy-paste the files above (replace/overwrite)
+3. `git init && git add .`
+4. Change the author name & GitHub URL in `pyproject.toml` and `README.md`
+
